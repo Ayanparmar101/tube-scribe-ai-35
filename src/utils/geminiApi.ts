@@ -35,7 +35,7 @@ export const generateSummaryWithGemini = async (
       Provide a brief overview of what the video is about.
       
       ## Main Content
-      Break down the video content into clear sections with timestamps, for example:
+      Break down the video content into 4-6 chronological sections with REALISTIC timestamps, for example:
       
       ## [2:15] Topic One
       Summarize this section of the video.
@@ -44,7 +44,7 @@ export const generateSummaryWithGemini = async (
       Summarize this section of the video.
       
       ## Questions Asked
-      If any questions are asked in the video, list them with timestamps and answers.
+      If any questions are asked in the video, list them with realistic timestamps and answers.
       Format as: "Q: [10:25] What is the question asked?"
       Include the answer directly below each question.
       
@@ -52,7 +52,9 @@ export const generateSummaryWithGemini = async (
       List 3-5 main points or lessons from the video.
       
       IMPORTANT FORMATTING RULES:
-      - ALWAYS include timestamps in [MM:SS] format
+      - Use REALISTIC timestamps in [MM:SS] format that progress chronologically through the video
+      - For a typical 10-minute video, start with [0:00] and end around [8:00]-[10:00]
+      - Space timestamps appropriately throughout the video duration
       - Each main section MUST start with "## " followed by the heading
       - Highlight important points with timestamps
       - Keep paragraphs short and focused
