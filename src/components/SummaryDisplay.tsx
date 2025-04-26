@@ -65,6 +65,75 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
 
   if (!summary) return null;
 
+  // Function to process the summary text and render it with proper formatting
+  const renderFormattedSummary = () => {
+    // Split the summary by new lines
+    const lines = summary.split('\n');
+    const formattedContent = [];
+    
+    let currentSection = null;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line === '') continue;
+      
+      // Check if the line is a heading (either starts with ## or has timestamps)
+      const isHeading = line.startsWith('##') || 
+                        line.match(/^\[(\d+:\d+)\]/) || 
+                        line.match(/^(\d+:\d+)/) ||
+                        (line.length < 80 && (line.endsWith(':') || line.toUpperCase() === line));
+      
+      if (isHeading) {
+        // Add the current section if it exists
+        if (currentSection) {
+          formattedContent.push(currentSection);
+        }
+        
+        // Create a new section
+        currentSection = {
+          heading: line.replace(/^##\s*/, ''),
+          paragraphs: []
+        };
+      } else if (line.startsWith('Q:') || line.startsWith('Question:')) {
+        // Handle questions specifically
+        if (!currentSection) {
+          currentSection = {
+            heading: "Questions from the Video",
+            paragraphs: []
+          };
+        }
+        formattedContent.push({
+          heading: "Question",
+          paragraphs: [line]
+        });
+      } else if (currentSection) {
+        // Add the line to the current section
+        currentSection.paragraphs.push(line);
+      } else {
+        // If there's no current section, create a default one
+        currentSection = {
+          heading: "Summary",
+          paragraphs: [line]
+        };
+      }
+    }
+    
+    // Add the last section if it exists
+    if (currentSection) {
+      formattedContent.push(currentSection);
+    }
+    
+    return formattedContent.map((section, index) => (
+      <div key={index} className="mb-6">
+        <h3 className="text-lg font-semibold mb-2 text-youtube-dark">{section.heading}</h3>
+        {section.paragraphs.map((paragraph, pIdx) => (
+          <p key={pIdx} className="mb-3">{paragraph}</p>
+        ))}
+      </div>
+    ));
+  };
+
   return (
     <Card className="w-full max-w-3xl mx-auto mt-6">
       <CardHeader>
@@ -73,9 +142,7 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
       </CardHeader>
       <CardContent>
         <div className="prose prose-sm max-w-none">
-          {summary.split('\n').map((paragraph, idx) => (
-            <p key={idx} className="mb-3">{paragraph}</p>
-          ))}
+          {renderFormattedSummary()}
         </div>
       </CardContent>
     </Card>

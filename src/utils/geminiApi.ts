@@ -26,12 +26,37 @@ export const generateSummaryWithGemini = async (
     }
 
     const prompt = `
-      Please provide a concise and accurate summary of the following YouTube video:
+      Please provide a comprehensive summary of the following YouTube video:
       "${videoTitle}"
       
-      Structure the summary with 4-5 paragraphs, covering the main points and key takeaways.
-      Each paragraph should focus on a specific aspect or section of the video.
-      Be informative and precise, highlighting the most valuable information from the video.
+      Follow this specific format:
+      
+      ## Introduction [0:00]
+      Provide a brief overview of what the video is about.
+      
+      ## Main Content
+      Break down the video content into clear sections with timestamps, for example:
+      
+      ## [2:15] Topic One
+      Summarize this section of the video.
+      
+      ## [5:30] Topic Two
+      Summarize this section of the video.
+      
+      IMPORTANT - Questions Asked:
+      - If any questions are asked in the video, include them with their timestamps and answers.
+      - Format questions as: "Q: [10:25] What is the question asked?"
+      - Include the answer below each question.
+      
+      ## Key Takeaways
+      List 3-5 main points or lessons from the video.
+      
+      Note:
+      - Use timestamps in the [MM:SS] format when possible
+      - Break long paragraphs into smaller ones for readability
+      - Maintain chronological order
+      - Remember to include any important questions asked in the video
+      - Be informative and precise
     `;
 
     const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
@@ -51,7 +76,7 @@ export const generateSummaryWithGemini = async (
         ],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 800,
+          maxOutputTokens: 1000,
           topP: 0.8,
           topK: 40,
         },
