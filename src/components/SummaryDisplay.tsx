@@ -32,6 +32,8 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
   }
 
   if (error) {
+    const isApiVersionError = error.includes("models/gemini-pro is not found") || error.includes("API version");
+    
     return (
       <Card className="w-full max-w-3xl mx-auto mt-6 border-red-200">
         <CardHeader className="text-red-500">
@@ -41,8 +43,19 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
           </CardTitle>
           <Separator className="bg-red-200" />
         </CardHeader>
-        <CardContent className="text-red-500">
-          <p>{error}</p>
+        <CardContent className="space-y-4">
+          <p className="text-red-500">{error}</p>
+          
+          {isApiVersionError && (
+            <div className="text-sm bg-red-50 p-3 rounded-md border border-red-100">
+              <p className="font-medium mb-1">Troubleshooting tips:</p>
+              <ul className="list-disc list-inside space-y-1 text-gray-700">
+                <li>Verify that your API key is correct and has access to the Gemini API</li>
+                <li>Make sure your API key has the appropriate permissions for the gemini-pro model</li>
+                <li>Check if there are any regional restrictions for your API key</li>
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
     );

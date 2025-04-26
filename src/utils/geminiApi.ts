@@ -1,8 +1,8 @@
 
 import { toast } from "@/components/ui/use-toast";
 
-// API configuration
-const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+// Updated API configuration with correct API version
+const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
 
 export interface GeminiRequestOptions {
   apiKey: string;
