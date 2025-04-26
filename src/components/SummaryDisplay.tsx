@@ -1,13 +1,15 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { AlertCircle } from "lucide-react";
 
 interface SummaryDisplayProps {
   summary: string | null;
   isLoading: boolean;
+  error?: string | null;
 }
 
-const SummaryDisplay = ({ summary, isLoading }: SummaryDisplayProps) => {
+const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
   if (isLoading) {
     return (
       <Card className="w-full max-w-3xl mx-auto mt-6">
@@ -24,6 +26,23 @@ const SummaryDisplay = ({ summary, isLoading }: SummaryDisplayProps) => {
               style={{ width: `${Math.floor(Math.random() * 30) + 70}%` }}
             ></div>
           ))}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full max-w-3xl mx-auto mt-6 border-red-200">
+        <CardHeader className="text-red-500">
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle size={18} />
+            Summary Error
+          </CardTitle>
+          <Separator className="bg-red-200" />
+        </CardHeader>
+        <CardContent className="text-red-500">
+          <p>{error}</p>
         </CardContent>
       </Card>
     );
