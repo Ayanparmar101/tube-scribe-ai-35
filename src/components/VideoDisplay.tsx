@@ -6,6 +6,7 @@ interface VideoInfo {
   title: string;
   thumbnail: string;
   channel: string;
+  videoId: string;
 }
 
 interface VideoDisplayProps {
@@ -30,9 +31,14 @@ const VideoDisplay = ({ videoInfo }: VideoDisplayProps) => {
           </div>
         )}
         <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-youtube-red bg-opacity-80 flex items-center justify-center">
+          <a 
+            href={`https://www.youtube.com/watch?v=${videoInfo.videoId}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-16 h-16 rounded-full bg-youtube-red bg-opacity-80 flex items-center justify-center"
+          >
             <Youtube size={32} className="text-white" />
-          </div>
+          </a>
         </div>
       </div>
       <CardContent className="p-4">

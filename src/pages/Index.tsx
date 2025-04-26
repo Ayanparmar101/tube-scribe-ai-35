@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import VideoUrlInput from "@/components/VideoUrlInput";
@@ -11,6 +12,7 @@ interface VideoInfo {
   title: string;
   thumbnail: string;
   channel: string;
+  videoId: string;
 }
 
 const Index = () => {
@@ -23,6 +25,16 @@ const Index = () => {
     return savedKey || "";
   });
 
+  const isValidYouTubeVideo = async (videoId: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      return response.ok;
+    } catch (error) {
+      console.error("Video validation error:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (url: string) => {
     setIsLoading(true);
     setError(null);
@@ -32,6 +44,12 @@ const Index = () => {
       const videoId = extractVideoId(url);
       if (!videoId) {
         throw new Error("Could not extract video ID from URL");
+      }
+
+      // Validate video playability
+      const isPlayable = await isValidYouTubeVideo(videoId);
+      if (!isPlayable) {
+        throw new Error("The provided YouTube video is not accessible or playable");
       }
 
       // Fetch video info from YouTube oEmbed API
@@ -47,8 +65,9 @@ const Index = () => {
       // Update video info
       setVideoInfo({
         title: videoData.title,
-        thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : "",
-        channel: videoData.author_name || "YouTube Channel"
+        thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+        channel: videoData.author_name || "YouTube Channel",
+        videoId: videoId
       });
 
       // Generate summary using Gemini
@@ -68,10 +87,12 @@ const Index = () => {
       setError(error instanceof Error ? error.message : "An unknown error occurred");
       toast({
         title: "Error",
-        description: "Failed to process the video. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to process the video. Please try again.",
         variant: "destructive",
       });
-      // Keep any previous summary if there was an error
+      // Reset video info and summary
+      setVideoInfo(null);
+      setSummary(null);
     } finally {
       setIsLoading(false);
     }
