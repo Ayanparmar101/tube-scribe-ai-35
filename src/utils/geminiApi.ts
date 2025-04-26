@@ -29,7 +29,7 @@ export const generateSummaryWithGemini = async (
       Please provide a comprehensive summary of the following YouTube video:
       "${videoTitle}"
       
-      Follow this specific format:
+      Follow this specific format EXACTLY:
       
       ## Introduction [0:00]
       Provide a brief overview of what the video is about.
@@ -43,20 +43,22 @@ export const generateSummaryWithGemini = async (
       ## [5:30] Topic Two
       Summarize this section of the video.
       
-      IMPORTANT - Questions Asked:
-      - If any questions are asked in the video, include them with their timestamps and answers.
-      - Format questions as: "Q: [10:25] What is the question asked?"
-      - Include the answer below each question.
+      ## Questions Asked
+      If any questions are asked in the video, list them with timestamps and answers.
+      Format as: "Q: [10:25] What is the question asked?"
+      Include the answer directly below each question.
       
       ## Key Takeaways
       List 3-5 main points or lessons from the video.
       
-      Note:
-      - Use timestamps in the [MM:SS] format when possible
-      - Break long paragraphs into smaller ones for readability
-      - Maintain chronological order
-      - Remember to include any important questions asked in the video
-      - Be informative and precise
+      IMPORTANT FORMATTING RULES:
+      - ALWAYS include timestamps in [MM:SS] format
+      - Each main section MUST start with "## " followed by the heading
+      - Highlight important points with timestamps
+      - Keep paragraphs short and focused
+      - Questions MUST be formatted with "Q: " prefix and timestamp
+      - Maintain chronological order of content
+      - DO NOT SKIP ANY OF THESE SECTIONS
     `;
 
     const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
@@ -75,8 +77,8 @@ export const generateSummaryWithGemini = async (
           },
         ],
         generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1000,
+          temperature: 0.1, // Lower temperature for more consistent formatting
+          maxOutputTokens: 1500, // Increased token limit for more detailed summaries
           topP: 0.8,
           topK: 40,
         },

@@ -78,11 +78,15 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
       
       if (line === '') continue;
       
-      // Check if the line is a heading (either starts with ## or has timestamps)
+      // Enhanced heading detection
       const isHeading = line.startsWith('##') || 
-                        line.match(/^\[(\d+:\d+)\]/) || 
-                        line.match(/^(\d+:\d+)/) ||
-                        (line.length < 80 && (line.endsWith(':') || line.toUpperCase() === line));
+                      line.match(/^\[\d+:\d+\].*/) || // Timestamp at start
+                      line.match(/^## \[\d+:\d+\].*/) || // Heading with timestamp
+                      line.match(/^[A-Z][a-zA-Z\s]+:$/) || // Title with colon
+                      (line.length < 80 && line.toUpperCase() === line); // ALL CAPS short line
+      
+      // Special handling for timestamps in content
+      const hasTimestamp = line.match(/\[\d+:\d+\]/);
       
       if (isHeading) {
         // Add the current section if it exists
@@ -90,30 +94,43 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
           formattedContent.push(currentSection);
         }
         
+        // Clean up heading format
+        let heading = line.replace(/^## */, '');
+        
         // Create a new section
         currentSection = {
-          heading: line.replace(/^##\s*/, ''),
+          heading: heading,
           paragraphs: []
         };
       } else if (line.startsWith('Q:') || line.startsWith('Question:')) {
         // Handle questions specifically
-        if (!currentSection) {
-          currentSection = {
-            heading: "Questions from the Video",
-            paragraphs: []
-          };
+        if (currentSection && currentSection.heading.includes("Question")) {
+          // Add to existing question section
+          currentSection.paragraphs.push(line);
+        } else {
+          // Create new question section
+          if (currentSection) {
+            formattedContent.push(currentSection);
+          }
+          
+          // Extract timestamp if present
+          const timestampMatch = line.match(/\[(\d+:\d+)\]/);
+          const timestamp = timestampMatch ? ` at ${timestampMatch[1]}` : '';
+          
+          formattedContent.push({
+            heading: `Question${timestamp}`,
+            paragraphs: [line]
+          });
+          
+          currentSection = null;
         }
-        formattedContent.push({
-          heading: "Question",
-          paragraphs: [line]
-        });
       } else if (currentSection) {
         // Add the line to the current section
         currentSection.paragraphs.push(line);
       } else {
         // If there's no current section, create a default one
         currentSection = {
-          heading: "Summary",
+          heading: hasTimestamp ? "Content" : "Summary",
           paragraphs: [line]
         };
       }
@@ -126,10 +143,33 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
     
     return formattedContent.map((section, index) => (
       <div key={index} className="mb-6">
-        <h3 className="text-lg font-semibold mb-2 text-youtube-dark">{section.heading}</h3>
-        {section.paragraphs.map((paragraph, pIdx) => (
-          <p key={pIdx} className="mb-3">{paragraph}</p>
-        ))}
+        <h3 className="text-lg font-semibold mb-2 text-youtube-dark flex items-center">
+          {section.heading.includes("[") && section.heading.includes("]") ? (
+            <>
+              <span className="bg-youtube-red text-white px-2 py-1 rounded-md text-xs mr-2">
+                {section.heading.match(/\[([^\]]+)\]/)?.[1] || ""}
+              </span>
+              <span>{section.heading.replace(/\[[^\]]+\]/, "").trim()}</span>
+            </>
+          ) : (
+            section.heading
+          )}
+        </h3>
+        {section.paragraphs.map((paragraph, pIdx) => {
+          // Check if paragraph contains a timestamp but isn't a heading
+          const timestampMatch = paragraph.match(/\[(\d+:\d+)\]/);
+          if (timestampMatch && !paragraph.startsWith("Q:") && !paragraph.startsWith("Question:")) {
+            return (
+              <div key={pIdx} className="mb-3 flex">
+                <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs mr-2 h-fit">
+                  {timestampMatch[1]}
+                </span>
+                <p>{paragraph.replace(/\[[^\]]+\]/, "").trim()}</p>
+              </div>
+            );
+          }
+          return <p key={pIdx} className="mb-3">{paragraph}</p>;
+        })}
       </div>
     ));
   };
