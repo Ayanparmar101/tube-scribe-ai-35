@@ -32,7 +32,7 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
   }
 
   if (error) {
-    const isApiVersionError = error.includes("models/gemini-pro is not found") || error.includes("API version");
+    const isApiVersionError = error.includes("models/gemini") || error.includes("API version") || error.includes("not found");
     
     return (
       <Card className="w-full max-w-3xl mx-auto mt-6 border-red-200">
@@ -51,8 +51,10 @@ const SummaryDisplay = ({ summary, isLoading, error }: SummaryDisplayProps) => {
               <p className="font-medium mb-1">Troubleshooting tips:</p>
               <ul className="list-disc list-inside space-y-1 text-gray-700">
                 <li>Verify that your API key is correct and has access to the Gemini API</li>
-                <li>Make sure your API key has the appropriate permissions for the gemini-pro model</li>
+                <li>Make sure your API key has the appropriate permissions for Gemini models</li>
+                <li>We're now using the gemini-1.5-pro model which is the latest version</li>
                 <li>Check if there are any regional restrictions for your API key</li>
+                <li>Ensure your API key has billing enabled in Google AI Studio</li>
               </ul>
             </div>
           )}
