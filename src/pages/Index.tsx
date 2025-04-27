@@ -1,11 +1,8 @@
-
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import VideoUrlInput from "@/components/VideoUrlInput";
 import VideoDisplay from "@/components/VideoDisplay";
 import SummaryDisplay from "@/components/SummaryDisplay";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { generateSummaryWithGemini } from "@/utils/geminiApi";
 
 interface VideoInfo {
@@ -20,10 +17,9 @@ const Index = () => {
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string>(() => {
-    const savedKey = localStorage.getItem("gemini_api_key");
-    return savedKey || "";
-  });
+
+  // Hardcoded API key
+  const API_KEY = "AIzaSyDg12WAE8xPZjUEbWpX_-nwbwAohA6oRyM";
 
   const isValidYouTubeVideo = async (videoId: string): Promise<boolean> => {
     try {
@@ -38,7 +34,7 @@ const Index = () => {
   const handleSubmit = async (url: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Extract video ID
       const videoId = extractVideoId(url);
@@ -55,24 +51,24 @@ const Index = () => {
       // Fetch video info from YouTube oEmbed API
       const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
       const oEmbedResponse = await fetch(oEmbedUrl);
-      
+
       if (!oEmbedResponse.ok) {
         throw new Error("Failed to fetch video information");
       }
-      
+
       const videoData = await oEmbedResponse.json();
-      
+
       // Update video info
       setVideoInfo({
         title: videoData.title,
         thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
         channel: videoData.author_name || "YouTube Channel",
-        videoId: videoId
+        videoId: videoId,
       });
 
       // Generate summary using Gemini
-      const summaryText = await generateSummaryWithGemini(videoData.title, apiKey);
-      
+      const summaryText = await generateSummaryWithGemini(videoData.title, API_KEY);
+
       if (summaryText) {
         setSummary(summaryText);
         toast({
@@ -97,21 +93,14 @@ const Index = () => {
       setIsLoading(false);
     }
   };
-  
-  // Save API key to localStorage when it changes
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newKey = e.target.value;
-    setApiKey(newKey);
-    localStorage.setItem("gemini_api_key", newKey);
-  };
-  
+
   // Simple function to extract video ID from YouTube URL
   const extractVideoId = (url: string): string | null => {
     try {
       const urlObj = new URL(url);
-      if (urlObj.hostname.includes('youtube.com')) {
-        return urlObj.searchParams.get('v');
-      } else if (urlObj.hostname.includes('youtu.be')) {
+      if (urlObj.hostname.includes("youtube.com")) {
+        return urlObj.searchParams.get("v");
+      } else if (urlObj.hostname.includes("youtu.be")) {
         return urlObj.pathname.substring(1);
       }
     } catch (e) {
@@ -138,35 +127,18 @@ const Index = () => {
           </div>
         </div>
       </header>
-      
+
       <main className="container mx-auto px-4 py-8 space-y-8">
         <section className="text-center max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold mb-3">Summarize Any YouTube Video</h2>
           <p className="text-youtube-gray mb-6">
-            TubeScribe AI analyzes YouTube videos and creates concise summaries 
+            TubeScribe AI analyzes YouTube videos and creates concise summaries
             so you can quickly get the key points without watching the entire video.
           </p>
-          
-          <div className="mb-6 max-w-md mx-auto">
-            <Label htmlFor="api-key" className="text-left block mb-2">
-              Gemini API Key <span className="text-xs text-youtube-gray">(required)</span>
-            </Label>
-            <Input 
-              id="api-key" 
-              type="password"
-              value={apiKey}
-              onChange={handleApiKeyChange}
-              placeholder="Enter your Gemini API key"
-              className="mb-2"
-            />
-            <p className="text-xs text-left text-youtube-gray">
-              Get your API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-youtube-red hover:underline">Google AI Studio</a>
-            </p>
-          </div>
-          
+
           <VideoUrlInput onSubmit={handleSubmit} isLoading={isLoading} />
         </section>
-        
+
         {(videoInfo || isLoading) && (
           <section className="mt-8">
             <VideoDisplay videoInfo={videoInfo} />
@@ -174,7 +146,7 @@ const Index = () => {
           </section>
         )}
       </main>
-      
+
       <footer className="border-t border-gray-200 py-6 mt-12">
         <div className="container mx-auto px-4 text-center text-sm text-youtube-gray">
           <p>© 2025 TubeScribe AI. Not affiliated with YouTube.</p>
